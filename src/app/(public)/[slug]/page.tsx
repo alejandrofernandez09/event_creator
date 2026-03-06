@@ -50,14 +50,15 @@ export default async function EventPage({ params }: Props) {
         <PlaylistSection spotifyUrl={theme.sections.spotifyUrl} />
         {data.event.description ? (
           <section className='py-16 px-4 max-w-2xl mx-auto text-center'>
-            <p style={{ color: 'var(--color-text)', fontFamily: 'var(--font-body)' }} className='text-lg opacity-80 leading-relaxed'>
+            <div className='w-12 h-px mx-auto mb-8 rounded-full' style={{ backgroundColor: 'var(--color-primary)' }} />
+            <p style={{ color: 'var(--color-text)', fontFamily: 'var(--font-body)' }} className='text-lg opacity-75 leading-relaxed'>
               {data.event.description}
             </p>
           </section>
         ) : null}
         <RsvpForm eventSlug={slug} />
-        <footer className='py-8 text-center text-xs opacity-40' style={{ color: 'var(--color-text)' }}>
-          POC Alejandro
+        <footer className='py-8 text-center text-xs opacity-40' style={{ color: 'var(--color-text)', fontFamily: 'var(--font-body)' }}>
+          ✨ NOAH · Plataforma Event-as-a-Service
         </footer>
       </main>
     </ThemeProvider>

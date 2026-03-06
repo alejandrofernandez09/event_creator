@@ -1,14 +1,12 @@
 ﻿"use client";
 
+import { Card, CardContent } from "@/components/ui/card";
+
 interface PlaylistSectionProps {
   spotifyUrl?: string | null;
 }
 
 function extractSpotifyEmbedUrl(url: string): string | null {
-  // Suporta:
-  // https://open.spotify.com/playlist/3cEYpjA9oz...
-  // https://open.spotify.com/album/...
-  // https://open.spotify.com/track/...
   const match = url.match(/open\.spotify\.com\/(playlist|album|track|artist)\/([a-zA-Z0-9]+)/);
   if (!match) return null;
   return `https://open.spotify.com/embed/${match[1]}/${match[2]}?utm_source=generator&theme=0`;
@@ -21,44 +19,58 @@ export function PlaylistSection({ spotifyUrl }: PlaylistSectionProps) {
     <section
       id="playlist"
       className="py-20 px-4"
-      style={{ backgroundColor: "var(--color-secondary, #F59E0B)" + "22" }}
+      style={{ backgroundColor: `var(--color-secondary, #F59E0B)18` }}
     >
       <div className="max-w-2xl mx-auto text-center">
-        <div className="text-4xl mb-4"></div>
+        <p
+          className="text-xs uppercase tracking-[0.2em] font-semibold mb-3 opacity-60"
+          style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}
+        >
+          Trilha sonora
+        </p>
         <h2
-          className="text-3xl md:text-4xl font-bold mb-3"
+          className="text-3xl md:text-4xl font-extrabold mb-3"
           style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
         >
-          Playlist do Evento
+          🎵 Playlist do Evento
         </h2>
         <p
-          className="text-gray-500 mb-10"
-          style={{ fontFamily: "var(--font-body)" }}
+          className="mb-10 opacity-60"
+          style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}
         >
           A trilha sonora perfeita para essa celebração
         </p>
 
         {embedUrl ? (
-          <div className="rounded-2xl overflow-hidden shadow-lg">
-            <iframe
-              src={embedUrl}
-              width="100%"
-              height="352"
-              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-              loading="lazy"
-              style={{ border: "none" }}
-            />
-          </div>
+          <Card className="overflow-hidden shadow-xl border-0">
+            <CardContent className="p-0">
+              <iframe
+                src={embedUrl}
+                width="100%"
+                height="352"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy"
+                style={{ border: "none", display: "block" }}
+                title="Playlist do evento"
+              />
+            </CardContent>
+          </Card>
         ) : (
           <div
-            className="rounded-2xl border-2 border-dashed py-16 px-8"
-            style={{ borderColor: "var(--color-primary)", opacity: 0.5 }}
+            className="rounded-2xl border-2 border-dashed py-16 px-8 text-center"
+            style={{ borderColor: `var(--color-primary)60` }}
           >
             <p
-              className="text-lg font-medium"
+              className="text-4xl mb-3"
+              aria-hidden="true"
+            >
+              🎶
+            </p>
+            <p
+              className="font-medium opacity-60"
               style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}
             >
-              A playlist será divulgada em breve 
+              A playlist será divulgada em breve
             </p>
           </div>
         )}

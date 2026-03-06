@@ -1,6 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { Product } from "@/types";
 import { formatBRL } from "@/lib/utils";
 
@@ -18,10 +25,35 @@ interface CheckoutState {
   error: string;
 }
 
+function GiftCardSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <Skeleton className="w-full h-48" />
+      <CardContent className="p-5 space-y-3">
+        <Skeleton className="h-5 w-3/4" />
+        <Skeleton className="h-4 w-full" />
+        <div className="flex justify-between items-center pt-2">
+          <Skeleton className="h-7 w-20" />
+          <Skeleton className="h-9 w-28 rounded-full" />
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export function GiftList({ products, eventSlug }: GiftListProps) {
   const [checkout, setCheckout] = useState<CheckoutState>({
     productId: null, guestName: '', guestEmail: '', loading: false, done: false, error: '',
   });
+
+  function openCheckout(productId: string) {
+    setCheckout((c) => ({ ...c, productId, done: false, error: '' }));
+  }
+
+  function closeCheckout() {
+    if (checkout.loading) return;
+    setCheckout((c) => ({ ...c, productId: null }));
+  }
 
   async function handleCheckout(e: React.FormEvent) {
     e.preventDefault();
@@ -46,116 +78,143 @@ export function GiftList({ products, eventSlug }: GiftListProps) {
     }
   }
 
+  const selectedProduct = products.find((p) => p.id === checkout.productId);
+
   return (
-    <section id='presentes' className='py-20 px-4' style={{ backgroundColor: 'var(--color-background)' }}>
-      <div className='max-w-4xl mx-auto'>
-        <h2 className='text-3xl md:text-4xl font-bold text-center mb-3'
-          style={{ color: 'var(--color-text)', fontFamily: 'var(--font-heading)' }}>
+    <section id="presentes" className="py-20 px-4" style={{ backgroundColor: "var(--color-background)" }}>
+      <div className="max-w-4xl mx-auto">
+        <h2
+          className="text-3xl md:text-4xl font-extrabold text-center mb-3"
+          style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
+        >
           Lista de Presentes
         </h2>
-        <p className='text-center text-gray-500 mb-12' style={{ fontFamily: 'var(--font-body)' }}>
+        <p className="text-center mb-12 opacity-60" style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}>
           Escolha um presente e contribua via Pix
         </p>
 
         {products.length === 0 ? (
-          <p className='text-center text-gray-400 py-16' style={{ fontFamily: 'var(--font-body)' }}>
-            A lista de presentes sera divulgada em breve.
-          </p>
-        ) : (
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-          {products.map((product) => (
-            <div key={product.id}
-              className='bg-white rounded-2xl overflow-hidden shadow-sm border hover:shadow-md transition-shadow cursor-pointer'
-              onClick={() => setCheckout((c) => ({ ...c, productId: product.id, done: false, error: '' }))}
+          <div className="py-20 text-center">
+            <div className="text-6xl mb-4">🎁</div>
+            <h3
+              className="text-xl font-bold mb-2"
+              style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
             >
-              {product.imgUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={product.imgUrl} alt={product.name} className='w-full h-48 object-cover' />
-              ) : (
-                <div className='w-full h-48 flex items-center justify-center text-5xl'
-                  style={{ backgroundColor: 'var(--color-primary)', opacity: 0.1 }}>
-                  
-                </div>
-              )}
-              <div className='p-5'>
-                <h3 className='font-semibold text-gray-800 mb-1' style={{ fontFamily: 'var(--font-heading)' }}>
-                  {product.name}
-                </h3>
-                {product.description && (
-                  <p className='text-sm text-gray-500 mb-3 line-clamp-2' style={{ fontFamily: 'var(--font-body)' }}>
-                    {product.description}
-                  </p>
+              Lista em breve
+            </h3>
+            <p className="opacity-50" style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}>
+              Os presentes serão adicionados em breve pelo organizador.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {products.map((product) => (
+              <Card
+                key={product.id}
+                className="overflow-hidden hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer group"
+                onClick={() => openCheckout(product.id)}
+              >
+                {product.imgUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={product.imgUrl} alt={product.name} className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform" />
+                ) : (
+                  <div className="w-full h-48 flex items-center justify-center text-6xl" style={{ backgroundColor: "var(--color-primary)18" }}>
+                    
+                  </div>
                 )}
-                <div className='flex items-center justify-between'>
-                  <span className='text-xl font-bold' style={{ color: 'var(--color-primary)' }}>
+                <CardContent className="p-5">
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <h3 className="font-bold text-base leading-snug" style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}>
+                      {product.name}
+                    </h3>
+                    {product.available > 0 && (
+                      <Badge variant="secondary" className="shrink-0 text-xs" style={{ backgroundColor: "var(--color-primary)18", color: "var(--color-primary)" }}>
+                        {product.available} cota{product.available !== 1 ? 's' : ''}
+                      </Badge>
+                    )}
+                  </div>
+                  {product.description && (
+                    <p className="text-sm line-clamp-2 mb-3 opacity-60" style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}>
+                      {product.description}
+                    </p>
+                  )}
+                </CardContent>
+                <CardFooter className="px-5 pb-5 pt-0 flex items-center justify-between">
+                  <span className="text-xl font-extrabold" style={{ color: "var(--color-primary)", fontFamily: "var(--font-body)" }}>
                     {formatBRL(product.price)}
                   </span>
-                  <button
-                    className='px-4 py-2 rounded-full text-sm font-medium text-white transition-transform hover:scale-105'
-                    style={{ backgroundColor: 'var(--color-primary)' }}
-                    onClick={(e) => { e.stopPropagation(); setCheckout((c) => ({ ...c, productId: product.id, done: false, error: '' })); }}
+                  <Button
+                    size="sm"
+                    className="rounded-full text-sm font-semibold"
+                    style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}
+                    onClick={(e) => { e.stopPropagation(); openCheckout(product.id); }}
                   >
                     Presentear
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-        )}
-
-        {/* Modal de checkout */}
-        {checkout.productId && !checkout.done && (
-          <div className='fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4'
-            style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
-            <div className='bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl'
-              onClick={(e) => e.stopPropagation()}>
-              <h3 className='text-xl font-bold mb-1' style={{ fontFamily: 'var(--font-heading)' }}>
-                Finalizar presente
-              </h3>
-              {(() => {
-                const p = products.find((x) => x.id === checkout.productId);
-                return p ? <p className='text-gray-500 text-sm mb-5'>{p.name} - {formatBRL(p.price)}</p> : null;
-              })()}
-              <form onSubmit={handleCheckout} className='space-y-3'>
-                <input type='text' placeholder='Seu nome *' value={checkout.guestName}
-                  onChange={(e) => setCheckout((c) => ({ ...c, guestName: e.target.value }))}
-                  className='w-full border rounded-xl px-4 py-3 text-sm outline-none focus:ring-2' />
-                <input type='email' placeholder='Seu e-mail (opcional)' value={checkout.guestEmail}
-                  onChange={(e) => setCheckout((c) => ({ ...c, guestEmail: e.target.value }))}
-                  className='w-full border rounded-xl px-4 py-3 text-sm outline-none' />
-                {checkout.error && <p className='text-red-500 text-sm'>{checkout.error}</p>}
-                <div className='flex gap-3'>
-                  <button type='button'
-                    onClick={() => setCheckout((c) => ({ ...c, productId: null }))}
-                    className='flex-1 py-3 rounded-full border text-gray-600 text-sm font-medium'>
-                    Cancelar
-                  </button>
-                  <button type='submit' disabled={checkout.loading}
-                    className='flex-1 py-3 rounded-full text-white text-sm font-semibold disabled:opacity-60'
-                    style={{ backgroundColor: 'var(--color-primary)' }}>
-                    {checkout.loading ? 'Aguarde...' : 'Confirmar'}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
-
-        {checkout.done && (
-          <div className='mt-10 text-center py-8'>
-            <div className='text-5xl mb-4'></div>
-            <h3 className='text-2xl font-bold' style={{ fontFamily: 'var(--font-heading)' }}>Presente enviado!</h3>
-            <p className='text-gray-500 mt-2' style={{ fontFamily: 'var(--font-body)' }}>
-              O pagamento sera processado em breve.
-            </p>
-            <button onClick={() => setCheckout((c) => ({ ...c, productId: null, done: false }))}
-              className='mt-4 text-sm underline' style={{ color: 'var(--color-primary)' }}>
-              Presentear outro item
-            </button>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
           </div>
         )}
       </div>
+
+      <Dialog open={!!checkout.productId} onOpenChange={(open) => { if (!open) closeCheckout(); }}>
+        <DialogContent className="sm:max-w-sm">
+          {checkout.done ? (
+            <div className="text-center py-6 space-y-4">
+              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto" style={{ backgroundColor: "var(--color-primary)18" }}>
+                🎉
+              </div>
+              <DialogHeader>
+                <DialogTitle style={{ fontFamily: "var(--font-heading)" }}>Pix gerado com sucesso!</DialogTitle>
+                <DialogDescription style={{ fontFamily: "var(--font-body)" }}>
+                  Aguardando confirmação do pagamento. O presente será registrado automaticamente ao confirmar o Pix.
+                </DialogDescription>
+              </DialogHeader>
+              <Button className="w-full rounded-full" style={{ backgroundColor: "var(--color-primary)", color: "#fff" }} onClick={closeCheckout}>
+                Fechar
+              </Button>
+            </div>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle style={{ fontFamily: "var(--font-heading)" }}>Finalizar presente</DialogTitle>
+                {selectedProduct && (
+                  <div className="flex items-center justify-between mt-2 p-3 rounded-xl" style={{ backgroundColor: "var(--color-primary)10" }}>
+                    <span className="text-sm font-medium" style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}>
+                      {selectedProduct.name}
+                    </span>
+                    <span className="text-base font-extrabold" style={{ color: "var(--color-primary)" }}>
+                      {formatBRL(selectedProduct.price)}
+                    </span>
+                  </div>
+                )}
+              </DialogHeader>
+              <form onSubmit={handleCheckout} className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <Label htmlFor="checkout-name" style={{ fontFamily: "var(--font-body)" }}>Seu nome *</Label>
+                  <Input id="checkout-name" placeholder="Como quer aparecer no presente" value={checkout.guestName} onChange={(e) => setCheckout((c) => ({ ...c, guestName: e.target.value }))} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="checkout-email" style={{ fontFamily: "var(--font-body)" }}>E-mail <span className="text-muted-foreground font-normal">(opcional)</span></Label>
+                  <Input id="checkout-email" type="email" placeholder="Para recibo do pagamento" value={checkout.guestEmail} onChange={(e) => setCheckout((c) => ({ ...c, guestEmail: e.target.value }))} />
+                </div>
+                {checkout.error && (
+                  <p className="text-sm text-destructive bg-destructive/10 border border-destructive/20 rounded-lg px-3 py-2">
+                    {checkout.error}
+                  </p>
+                )}
+                <div className="flex gap-3 pt-1">
+                  <Button type="button" variant="outline" className="flex-1 rounded-full" onClick={closeCheckout} disabled={checkout.loading}>Cancelar</Button>
+                  <Button type="submit" disabled={checkout.loading} className="flex-1 rounded-full font-semibold" style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}>
+                    {checkout.loading ? "Aguarde..." : "💳 Gerar Pix"}
+                  </Button>
+                </div>
+              </form>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
