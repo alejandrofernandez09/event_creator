@@ -1,36 +1,79 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+﻿# EaaS  Event-as-a-Service (POC)
 
-## Getting Started
+Plataforma que transforma eventos sociais (aniversários, casamentos, formaturas) em hubs digitais de alta conversão, unindo site premium gerado por IA com fintech de nicho via Pix.
 
-First, run the development server:
+## Stack
+
+- **Frontend**: Next.js 15 (App Router + PPR) + Tailwind CSS
+- **Backend**: Serverless Functions (Node.js TypeScript)
+- **Banco de dados**: PostgreSQL (Drizzle ORM)
+- **Pagamentos**: Asaas API  Pix dinâmico + Webhook
+- **IA / Temas**: OpenAI  `theme_json`  CSS custom properties
+- **E-mail**: Resend
+
+## Pré-requisitos
+
+- Node.js 20+
+- PostgreSQL acessível (RDS, Docker ou local)
+
+## Configuração
+
+Copie o arquivo de exemplo e preencha as variáveis:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cp .env.example .env.local
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+| Variável | Descrição |
+|---|---|
+| `DATABASE_URL` | Connection string PostgreSQL |
+| `ASAAS_API_KEY` | Chave da API Asaas (sandbox ou produção) |
+| `ASAAS_WEBHOOK_SECRET` | Token de validação do webhook Asaas |
+| `ASAAS_ENV` | `sandbox` ou `production` |
+| `OPENAI_API_KEY` | Chave OpenAI para geração de temas |
+| `RESEND_API_KEY` | Chave Resend para envio de e-mails |
+| `EMAIL_FROM` | Endereço remetente dos e-mails |
+| `NEXT_PUBLIC_BASE_URL` | URL base pública da aplicação |
+| `DASHBOARD_SECRET` | Token de acesso ao dashboard |
+| `ENABLE_PAYMENTS` | `true` para habilitar pagamentos via Asaas |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Rodando localmente
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm install
+npm run db:push   # aplica o schema no banco
+npm run dev       # inicia em http://localhost:3000
+```
 
-## Learn More
+## Scripts disponíveis
 
-To learn more about Next.js, take a look at the following resources:
+| Comando | Descrição |
+|---|---|
+| `npm run dev` | Servidor de desenvolvimento |
+| `npm run build` | Build de produção |
+| `npm run start` | Inicia build de produção |
+| `npm run db:push` | Aplica schema no banco sem migrations |
+| `npm run db:migrate` | Executa migrations geradas |
+| `npm run db:generate` | Gera arquivos de migration |
+| `npm run db:studio` | Abre Drizzle Studio (UI do banco) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Rotas principais
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Rota | Descrição |
+|---|---|
+| `/` | Landing page da plataforma |
+| `/criar` | Criar novo evento |
+| `/[slug]` | Site público do evento |
+| `/dashboard/[slug]` | Dashboard do aniversariante |
+| `/api/events` | CRUD de eventos |
+| `/api/products` | CRUD de produtos/presentes |
+| `/api/checkout` | Gerar cobrança Pix |
+| `/api/rsvp` | Confirmação de presença |
+| `/api/generate-theme` | Geração de tema via IA |
+| `/api/webhook/asaas` | Webhook de confirmação de pagamento |
 
-## Deploy on Vercel
+## Modelo de negócio
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Comissão de **10%** sobre o total transacionado confirmado por evento. O dashboard exibe `Total arrecadado` e `Comissão devida`.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> **Invariante crítica:** `orders.status` é atualizado **apenas** pelo webhook Asaas  nunca pelo frontend ou fluxo síncrono.
