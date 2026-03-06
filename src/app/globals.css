@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+/*  CSS Custom Properties (tema dinamico)  */
+:root {
+  --color-primary: #7c3aed;
+  --color-secondary: #f59e0b;
+  --color-background: #fafafa;
+  --color-text: #1f2937;
+  --color-accent: #ec4899;
+  --font-heading: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+}
+
+/* Smooth scroll global */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Reset de foco acessivel */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
