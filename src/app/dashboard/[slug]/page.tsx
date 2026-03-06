@@ -5,6 +5,7 @@ import { eq, and, sum } from 'drizzle-orm';
 import { parseThemeJson } from '@/lib/theme';
 import { formatBRL, calcComissao } from '@/lib/utils';
 import { ProductManager } from '@/components/dashboard/ProductManager';
+import { deleteProduct } from './actions';
 
 interface Props { params: Promise<{ slug: string }>; searchParams: Promise<{ secret?: string }>; }
 export const dynamic = 'force-dynamic';
@@ -52,7 +53,7 @@ export default async function DashboardPage({ params, searchParams }: Props) {
       <div className='max-w-5xl mx-auto px-4 py-8 space-y-8'>
         <ProductManager
           eventSlug={slug}
-          secret={secret!}
+          onDelete={deleteProduct}
           initialProducts={productList.map((p) => ({ id: p.id, name: p.name, description: p.description ?? null, price: p.price, imgUrl: p.imgUrl ?? null }))}
           primaryColor={theme.colors.primary}
         />

@@ -13,12 +13,13 @@ interface Product {
 
 interface Props {
   eventSlug: string;
-  secret: string;
+  /** Server Action injetado pelo Server Component pai — secret nunca chega ao cliente */
+  onDelete: (productId: string, eventSlug: string) => Promise<{ ok: boolean; error?: string }>;
   initialProducts: Product[];
   primaryColor: string;
 }
 
-export function ProductManager({ eventSlug, secret, initialProducts, primaryColor }: Props) {
+export function ProductManager({ eventSlug, onDelete, initialProducts, primaryColor }: Props) {
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [form, setForm] = useState({ name: "", description: "", price: "", imgUrl: "" });
   const [loading, setLoading] = useState(false);
@@ -48,10 +49,12 @@ export function ProductManager({ eventSlug, secret, initialProducts, primaryColo
 
   async function handleDelete(productId: string) {
     if (!confirm("Remover este presente da lista?")) return;
-    try {
-      const res = await fetch(`/api/products?id=${productId}&eventSlug=${eventSlug}&secret=${secret}`, { method: "DELETE" });
-      if (res.ok) setProducts((prev) => prev.filter((p) => p.id !== productId));
-    } catch { alert("Erro ao remover"); }
+    const result = await onDelete(productId, eventSlug);
+    if (result.ok) {
+      setProducts((prev) => prev.filter((p) => p.id !== productId));
+    } else {
+      alert(result.error ?? "Erro ao remover");
+    }
   }
 
   return (
@@ -71,6 +74,7 @@ export function ProductManager({ eventSlug, secret, initialProducts, primaryColo
             <div key={p.id} className="px-6 py-4 flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 min-w-0">
                 {p.imgUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={p.imgUrl} alt={p.name} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
                 ) : (
                   <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center text-xl flex-shrink-0">🎁</div>

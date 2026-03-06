@@ -69,6 +69,7 @@ export function GiftList({ products, eventSlug }: GiftListProps) {
               onClick={() => setCheckout((c) => ({ ...c, productId: product.id, done: false, error: '' }))}
             >
               {product.imgUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={product.imgUrl} alt={product.name} className='w-full h-48 object-cover' />
               ) : (
                 <div className='w-full h-48 flex items-center justify-center text-5xl'

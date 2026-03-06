@@ -1,5 +1,5 @@
 ﻿import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
+import { cache } from 'react';
 import { db } from '@/db';
 import { events, products } from '@/db/schema';
 import { eq } from 'drizzle-orm';
@@ -14,7 +14,7 @@ interface Props { params: Promise<{ slug: string }>; }
 
 export const dynamic = 'force-dynamic';
 
-async function getEventData(slug: string) {
+const getEventData = cache(async function getEventData(slug: string) {
   try {
     const [event] = await db.select().from(events).where(eq(events.slug, slug)).limit(1);
     if (!event) return null;
@@ -24,7 +24,7 @@ async function getEventData(slug: string) {
     console.error('[event-page] Failed to load event:', slug, err);
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;
@@ -45,9 +45,7 @@ export default async function EventPage({ params }: Props) {
   return (
     <ThemeProvider theme={theme}>
       <main style={{ backgroundColor: 'var(--color-background)', minHeight: '100vh' }}>
-        <Suspense fallback={<div>Carregando...</div>}>
-          <EventHero eventName={data.event.name} eventDate={new Date(data.event.date)} theme={theme} />
-        </Suspense>
+        <EventHero eventName={data.event.name} eventDate={new Date(data.event.date)} theme={theme} />
         <GiftList products={mappedProducts} eventSlug={slug} />
         <PlaylistSection spotifyUrl={theme.sections.spotifyUrl} />
         {data.event.description ? (
