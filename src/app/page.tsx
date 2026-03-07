@@ -2,20 +2,21 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Sparkles, Gift, Users, Zap, QrCode, Smartphone, ArrowRight } from "lucide-react";
 
 const FEATURES = [
   {
-    icon: "",
+    Icon: Sparkles,
     title: "Site temático por IA",
     desc: "Descreva o clima do evento e a IA gera paleta de cores, fontes e copywriting em segundos.",
   },
   {
-    icon: "",
+    Icon: Gift,
     title: "Lista de presentes via Pix",
     desc: "Convidados presenteiam direto pelo celular. Você recebe na hora na sua conta.",
   },
   {
-    icon: "",
+    Icon: Users,
     title: "RSVP nativo",
     desc: "Gestão de confirmações integrada ao site do evento. QR Code único por convidado.",
   },
@@ -35,7 +36,7 @@ export default function HomePage() {
       <nav className="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-violet-100 px-4">
         <div className="max-w-5xl mx-auto h-16 flex items-center justify-between">
           <span className="font-bold text-lg text-violet-700 tracking-tight" style={{ fontFamily: '"Playfair Display", serif' }}>
-             NOAH
+            NOAH
           </span>
           <div className="flex items-center gap-3">
             <Badge variant="secondary" className="hidden sm:inline-flex text-xs bg-violet-100 text-violet-700">
@@ -72,10 +73,10 @@ export default function HomePage() {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button asChild size="lg" className="text-base px-8 rounded-full shadow-lg shadow-violet-200">
-              <Link href="/criar"> Criar meu evento</Link>
+              <Link href="/criar">Criar meu evento</Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="text-base px-8 rounded-full border-violet-300 text-violet-700 hover:bg-violet-50">
-              <Link href="/demo-evento-123">Ver demo ao vivo </Link>
+              <Link href="/demo-evento-123" className="flex items-center gap-2">Ver demo ao vivo <ArrowRight size={16} /></Link>
             </Button>
           </div>
         </div>
@@ -84,13 +85,13 @@ export default function HomePage() {
       {/* Trust bar */}
       <div className="border-y border-violet-100 bg-white/60 backdrop-blur-sm py-4 px-4">
         <div className="max-w-3xl mx-auto flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs text-gray-400 font-medium uppercase tracking-wider">
-          <span> Site em segundos</span>
+          <span className="flex items-center gap-1.5"><Zap size={12} /> Site em segundos</span>
           <span className="hidden sm:block text-violet-200">|</span>
-          <span> Pix direto na sua conta</span>
+          <span className="flex items-center gap-1.5"><QrCode size={12} /> Pix direto na sua conta</span>
           <span className="hidden sm:block text-violet-200">|</span>
-          <span> Sem taxas antecipadas</span>
+          <span className="flex items-center gap-1.5"><Gift size={12} /> Sem taxas antecipadas</span>
           <span className="hidden sm:block text-violet-200">|</span>
-          <span> Mobile first</span>
+          <span className="flex items-center gap-1.5"><Smartphone size={12} /> Mobile first</span>
         </div>
       </div>
 
@@ -106,8 +107,8 @@ export default function HomePage() {
           {FEATURES.map((f) => (
             <Card key={f.title} className="border-violet-100 hover:shadow-lg hover:shadow-violet-100/60 hover:-translate-y-1 transition-all duration-200">
               <CardContent className="pt-7 pb-7">
-                <div className="text-4xl mb-5 w-14 h-14 flex items-center justify-center rounded-2xl bg-violet-50">
-                  {f.icon}
+                <div className="mb-5 w-14 h-14 flex items-center justify-center rounded-2xl bg-violet-50">
+                  <f.Icon size={24} className="text-violet-500" />
                 </div>
                 <h3 className="font-bold text-gray-900 mb-2 text-base">{f.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
@@ -145,7 +146,7 @@ export default function HomePage() {
           </div>
           <div className="text-center mt-12">
             <Button asChild size="lg" className="bg-white text-violet-700 hover:bg-violet-50 rounded-full px-8 font-bold">
-              <Link href="/criar">Começar agora </Link>
+              <Link href="/criar" className="flex items-center gap-2">Começar agora <ArrowRight size={16} /></Link>
             </Button>
           </div>
         </div>

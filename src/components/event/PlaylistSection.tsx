@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { Music } from "lucide-react";
 
 interface PlaylistSectionProps {
   spotifyUrl?: string | null;
@@ -32,7 +33,7 @@ export function PlaylistSection({ spotifyUrl }: PlaylistSectionProps) {
           className="text-3xl md:text-4xl font-extrabold mb-3"
           style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
         >
-          🎵 Playlist do Evento
+          <span className="inline-flex items-center gap-2"><Music size={30} /> Playlist do Evento</span>
         </h2>
         <p
           className="mb-10 opacity-60"
@@ -60,12 +61,7 @@ export function PlaylistSection({ spotifyUrl }: PlaylistSectionProps) {
             className="rounded-2xl border-2 border-dashed py-16 px-8 text-center"
             style={{ borderColor: `var(--color-primary)60` }}
           >
-            <p
-              className="text-4xl mb-3"
-              aria-hidden="true"
-            >
-              🎶
-            </p>
+            <Music size={40} className="mx-auto mb-3 opacity-30" style={{ color: "var(--color-text)" }} />
             <p
               className="font-medium opacity-60"
               style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}

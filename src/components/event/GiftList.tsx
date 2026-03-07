@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Gift, PartyPopper, Copy, Check, QrCode } from "lucide-react";
 import type { Product } from "@/types";
 import { formatBRL } from "@/lib/utils";
 
@@ -106,7 +106,9 @@ export function GiftList({ products, eventSlug }: GiftListProps) {
 
         {products.length === 0 ? (
           <div className="py-20 text-center">
-            <div className="text-6xl mb-4">🎁</div>
+            <div className="flex justify-center mb-4">
+              <Gift size={56} style={{ color: "var(--color-primary)", opacity: 0.3 }} />
+            </div>
             <h3
               className="text-xl font-bold mb-2"
               style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
@@ -122,47 +124,40 @@ export function GiftList({ products, eventSlug }: GiftListProps) {
             {products.map((product) => (
               <Card
                 key={product.id}
-                className="overflow-hidden hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer group"
+                className="overflow-hidden flex flex-col hover:shadow-lg transition-all hover:-translate-y-0.5 cursor-pointer group"
                 onClick={() => openCheckout(product.id)}
               >
                 {product.imgUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.imgUrl} alt={product.name} className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform" />
+                  <img src={product.imgUrl} alt={product.name} className="w-full h-44 object-cover group-hover:scale-[1.02] transition-transform" />
                 ) : (
-                  <div className="w-full h-48 flex items-center justify-center text-6xl" style={{ backgroundColor: "var(--color-primary)18" }}>
-                    
+                  <div className="w-full h-44 flex items-center justify-center" style={{ backgroundColor: "var(--color-primary)12" }}>
+                    <Gift size={40} style={{ color: "var(--color-primary)", opacity: 0.3 }} />
                   </div>
                 )}
-                <CardContent className="p-5">
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-bold text-base leading-snug" style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}>
-                      {product.name}
-                    </h3>
-                    {product.available > 0 && (
-                      <Badge variant="secondary" className="shrink-0 text-xs" style={{ backgroundColor: "var(--color-primary)18", color: "var(--color-primary)" }}>
-                        {product.available} cota{product.available !== 1 ? 's' : ''}
-                      </Badge>
-                    )}
-                  </div>
+                <CardContent className="flex-1 flex flex-col p-4 gap-1">
+                  <h3 className="font-bold text-base leading-snug" style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}>
+                    {product.name}
+                  </h3>
                   {product.description && (
-                    <p className="text-sm line-clamp-2 mb-3 opacity-60" style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}>
+                    <p className="text-sm line-clamp-2 flex-1 mt-1 opacity-60" style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}>
                       {product.description}
                     </p>
                   )}
+                  <div className="flex items-center justify-between gap-2 mt-auto pt-3 border-t border-border/50">
+                    <span className="text-xl font-extrabold" style={{ color: "var(--color-primary)", fontFamily: "var(--font-body)" }}>
+                      {formatBRL(product.price)}
+                    </span>
+                    <Button
+                      size="sm"
+                      className="rounded-full text-sm font-semibold px-4 shrink-0"
+                      style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}
+                      onClick={(e) => { e.stopPropagation(); openCheckout(product.id); }}
+                    >
+                      Presentear
+                    </Button>
+                  </div>
                 </CardContent>
-                <CardFooter className="px-5 pb-5 pt-0 flex items-center justify-between">
-                  <span className="text-xl font-extrabold" style={{ color: "var(--color-primary)", fontFamily: "var(--font-body)" }}>
-                    {formatBRL(product.price)}
-                  </span>
-                  <Button
-                    size="sm"
-                    className="rounded-full text-sm font-semibold"
-                    style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}
-                    onClick={(e) => { e.stopPropagation(); openCheckout(product.id); }}
-                  >
-                    Presentear
-                  </Button>
-                </CardFooter>
               </Card>
             ))}
           </div>
@@ -170,68 +165,124 @@ export function GiftList({ products, eventSlug }: GiftListProps) {
       </div>
 
       <Dialog open={!!checkout.productId} onOpenChange={(open) => { if (!open) closeCheckout(); }}>
-        <DialogContent className="sm:max-w-sm">
+        <DialogContent className="sm:max-w-md max-h-[92dvh] overflow-y-auto p-0">
           {checkout.done ? (
-            <div className="text-center py-4 space-y-4">
-              <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto" style={{ backgroundColor: "var(--color-primary)18" }}>
-                🎉
-              </div>
-              <DialogHeader>
-                <DialogTitle style={{ fontFamily: "var(--font-heading)" }}>Pix gerado!</DialogTitle>
-                <DialogDescription style={{ fontFamily: "var(--font-body)" }}>
-                  Escaneie o QR Code ou copie o código abaixo
-                </DialogDescription>
-              </DialogHeader>
-              {checkout.pixQrCodeImage && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={`data:image/png;base64,${checkout.pixQrCodeImage}`}
-                  alt="QR Code Pix"
-                  className="mx-auto w-48 h-48 rounded-xl border"
-                />
-              )}
-              {checkout.pixCode && (
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground">Código copia-e-cola</p>
-                  <div className="flex gap-2 items-center">
-                    <code className="text-xs bg-muted px-3 py-2 rounded-lg flex-1 truncate text-left block">
-                      {checkout.pixCode}
-                    </code>
-                    <Button
-                      size="sm"
-                      type="button"
-                      onClick={() => { navigator.clipboard.writeText(checkout.pixCode); setCheckout((c) => ({ ...c, copied: true })); }}
-                    >
-                      {checkout.copied ? "✓" : "Copiar"}
-                    </Button>
-                  </div>
+            <div className="flex flex-col">
+              {/* Header colorido */}
+              <div
+                className="flex flex-col items-center gap-3 px-6 pt-8 pb-6 text-center"
+                style={{ backgroundColor: "var(--color-primary)12" }}
+              >
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "var(--color-primary)22" }}
+                >
+                  <PartyPopper size={26} style={{ color: "var(--color-primary)" }} />
                 </div>
-              )}
-              {checkout.pixExpiry && (
-                <p className="text-xs text-muted-foreground">
-                  Válido até {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(checkout.pixExpiry))}
-                </p>
-              )}
-              <Button className="w-full rounded-full" style={{ backgroundColor: "var(--color-primary)", color: "#fff" }} onClick={closeCheckout}>
-                Fechar
-              </Button>
-            </div>
-          ) : (
-            <>
-              <DialogHeader>
-                <DialogTitle style={{ fontFamily: "var(--font-heading)" }}>Finalizar presente</DialogTitle>
-                {selectedProduct && (
-                  <div className="flex items-center justify-between mt-2 p-3 rounded-xl" style={{ backgroundColor: "var(--color-primary)10" }}>
-                    <span className="text-sm font-medium" style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}>
-                      {selectedProduct.name}
-                    </span>
-                    <span className="text-base font-extrabold" style={{ color: "var(--color-primary)" }}>
-                      {formatBRL(selectedProduct.price)}
-                    </span>
+                <div>
+                  <h2
+                    className="text-xl font-bold"
+                    style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
+                  >
+                    Pix gerado!
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1" style={{ fontFamily: "var(--font-body)" }}>
+                    Escaneie o QR Code ou copie o código abaixo
+                  </p>
+                </div>
+              </div>
+
+              <div className="px-6 pb-6 pt-5 space-y-5">
+                {/* QR Code */}
+                {checkout.pixQrCodeImage && (
+                  <div className="flex flex-col items-center gap-2">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={`data:image/png;base64,${checkout.pixQrCodeImage}`}
+                      alt="QR Code Pix"
+                      className="w-52 h-52 rounded-2xl border-2 shadow-sm"
+                      style={{ borderColor: "var(--color-primary)30" }}
+                    />
+                    <p className="text-xs text-muted-foreground">Aponte a câmera do celular para pagar</p>
                   </div>
                 )}
+
+                {/* Divisor com label */}
+                {checkout.pixQrCodeImage && checkout.pixCode && (
+                  <div className="flex items-center gap-3">
+                    <div className="flex-1 h-px bg-border" />
+                    <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">ou</span>
+                    <div className="flex-1 h-px bg-border" />
+                  </div>
+                )}
+
+                {/* Código copia-e-cola */}
+                {checkout.pixCode && (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Código Pix copia e cola</p>
+                    <div className="rounded-xl border bg-muted/50 p-3 space-y-3">
+                      <code
+                        className="text-xs text-foreground break-all leading-relaxed block"
+                        style={{ fontFamily: "monospace" }}
+                      >
+                        {checkout.pixCode}
+                      </code>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="w-full flex items-center justify-center gap-2 rounded-lg"
+                        style={checkout.copied
+                          ? { backgroundColor: "#16a34a", color: "#fff" }
+                          : { backgroundColor: "var(--color-primary)", color: "#fff" }}
+                        onClick={() => {
+                          navigator.clipboard.writeText(checkout.pixCode);
+                          setCheckout((c) => ({ ...c, copied: true }));
+                        }}
+                      >
+                        {checkout.copied ? <><Check size={14} /> Código copiado!</> : <><Copy size={14} /> Copiar código</>}
+                      </Button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Validade */}
+                {checkout.pixExpiry && (
+                  <p className="text-xs text-center text-muted-foreground">
+                    Expira em{" "}
+                    <span className="font-semibold text-foreground">
+                      {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(checkout.pixExpiry))}
+                    </span>
+                  </p>
+                )}
+
+                <Button
+                  variant="outline"
+                  className="w-full rounded-full"
+                  onClick={closeCheckout}
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="px-6 pb-6 pt-6 space-y-4">
+              <DialogHeader>
+                <DialogTitle style={{ fontFamily: "var(--font-heading)" }}>Finalizar presente</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleCheckout} className="space-y-4 pt-2">
+              {selectedProduct && (
+                <div
+                  className="flex items-center justify-between p-3 rounded-xl"
+                  style={{ backgroundColor: "var(--color-primary)10" }}
+                >
+                  <span className="text-sm font-medium" style={{ color: "var(--color-text)", fontFamily: "var(--font-body)" }}>
+                    {selectedProduct.name}
+                  </span>
+                  <span className="text-base font-extrabold" style={{ color: "var(--color-primary)" }}>
+                    {formatBRL(selectedProduct.price)}
+                  </span>
+                </div>
+              )}
+              <form onSubmit={handleCheckout} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="checkout-name" style={{ fontFamily: "var(--font-body)" }}>Seu nome *</Label>
                   <Input id="checkout-name" placeholder="Como quer aparecer no presente" value={checkout.guestName} onChange={(e) => setCheckout((c) => ({ ...c, guestName: e.target.value }))} />
@@ -247,12 +298,12 @@ export function GiftList({ products, eventSlug }: GiftListProps) {
                 )}
                 <div className="flex gap-3 pt-1">
                   <Button type="button" variant="outline" className="flex-1 rounded-full" onClick={closeCheckout} disabled={checkout.loading}>Cancelar</Button>
-                  <Button type="submit" disabled={checkout.loading} className="flex-1 rounded-full font-semibold" style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}>
-                    {checkout.loading ? "Aguarde..." : "💳 Gerar Pix"}
+                  <Button type="submit" disabled={checkout.loading} className="flex-1 rounded-full font-semibold flex items-center justify-center gap-2" style={{ backgroundColor: "var(--color-primary)", color: "#fff" }}>
+                    {checkout.loading ? "Aguarde..." : <><QrCode size={16} /> Gerar Pix</>}
                   </Button>
                 </div>
               </form>
-            </>
+            </div>
           )}
         </DialogContent>
       </Dialog>

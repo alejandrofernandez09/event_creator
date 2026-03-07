@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Calendar } from "lucide-react";
 import type { ThemeJson } from "@/types";
 
 interface EventHeroProps {
@@ -41,7 +42,7 @@ export function EventHero({ eventName, eventDate, theme }: EventHeroProps) {
             fontFamily: "var(--font-body)",
           }}
         >
-          📅 {formattedDate}
+          <Calendar size={12} /> {formattedDate}
         </p>
 
         <h1

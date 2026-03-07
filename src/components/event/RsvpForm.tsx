@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { CheckCircle2, XCircle, PartyPopper, Heart } from "lucide-react";
 
 interface RsvpFormProps {
   eventSlug: string;
@@ -52,7 +53,7 @@ export function RsvpForm({ eventSlug }: RsvpFormProps) {
           className="text-3xl md:text-4xl font-extrabold text-center mb-3"
           style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
         >
-          Confirme sua Presenças
+          Confirme sua Presença
         </h2>
         <p
           className="text-center mb-10 opacity-60"
@@ -63,7 +64,11 @@ export function RsvpForm({ eventSlug }: RsvpFormProps) {
 
         {done ? (
           <div className="text-center space-y-4 py-16 rounded-2xl border" style={{ borderColor: `var(--color-primary)40`, backgroundColor: `var(--color-primary)0d` }}>
-            <div className="text-6xl">{status === "confirmed" ? "🎉" : "🤗"}</div>
+            <div className="flex justify-center mb-2">
+              {status === "confirmed"
+                ? <PartyPopper size={56} style={{ color: "var(--color-primary)" }} />
+                : <Heart size={56} style={{ color: "var(--color-primary)" }} />}
+            </div>
             <h3
               className="text-2xl font-bold"
               style={{ color: "var(--color-text)", fontFamily: "var(--font-heading)" }}
@@ -86,7 +91,7 @@ export function RsvpForm({ eventSlug }: RsvpFormProps) {
                   type="button"
                   onClick={() => setStatus(s)}
                   className={cn(
-                    "py-3 rounded-xl text-sm font-semibold border-2 transition-all",
+                    "py-3 rounded-xl text-sm font-semibold border-2 transition-all flex items-center justify-center gap-2",
                     status === s
                       ? "text-white border-transparent"
                       : "border-current bg-transparent"
@@ -98,7 +103,7 @@ export function RsvpForm({ eventSlug }: RsvpFormProps) {
                     fontFamily: "var(--font-body)",
                   }}
                 >
-                  {s === "confirmed" ? "✅ Vou!" : "❌ Não posso ir"}
+                  {s === "confirmed" ? <><CheckCircle2 size={16} /> Vou!</> : <><XCircle size={16} /> Não posso ir</>}
                 </button>
               ))}
             </div>
@@ -160,7 +165,7 @@ export function RsvpForm({ eventSlug }: RsvpFormProps) {
                 fontFamily: "var(--font-body)",
               }}
             >
-              {loading ? "Enviando..." : status === "confirmed" ? "🎉 Confirmar Presença" : "Enviar Resposta"}
+              {loading ? "Enviando..." : status === "confirmed" ? <><PartyPopper size={18} /> Confirmar Presença</> : "Enviar Resposta"}
             </Button>
           </form>
         )}

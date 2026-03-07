@@ -10,6 +10,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import type { ThemeJson } from "@/types";
+import { Calendar, User, Palette, Sparkles, Settings2, PartyPopper, ArrowRight, ArrowLeft } from "lucide-react";
 
 const DEFAULT_THEME_PREVIEW: ThemeJson = {
   colors: { primary: "#7C3AED", secondary: "#F59E0B", background: "#FAFAFA", text: "#1F2937", accent: "#EC4899" },
@@ -22,9 +23,9 @@ const DEFAULT_THEME_PREVIEW: ThemeJson = {
 };
 
 const STEPS = [
-  { id: 1, label: "Evento", icon: "📅" },
-  { id: 2, label: "Organizador", icon: "👤" },
-  { id: 3, label: "Tema & Playlist", icon: "🎨" },
+  { id: 1, label: "Evento", Icon: Calendar },
+  { id: 2, label: "Organizador", Icon: User },
+  { id: 3, label: "Tema & Playlist", Icon: Palette },
 ];
 
 export default function CriarEventoPage() {
@@ -120,7 +121,7 @@ export default function CriarEventoPage() {
       <nav className="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-violet-100 px-4">
         <div className="max-w-lg mx-auto h-14 flex items-center justify-between">
           <a href="/" className="font-bold text-violet-700 tracking-tight" style={{ fontFamily: '"Playfair Display", serif' }}>
-            ✨ NOAH
+            NOAH
           </a>
           <span className="text-xs text-muted-foreground">
             Passo {step} de {STEPS.length}
@@ -163,7 +164,7 @@ export default function CriarEventoPage() {
                     : "bg-gray-100 text-gray-400 cursor-default"
                 }`}
               >
-                <span>{s.icon}</span> {s.label}
+                <s.Icon size={12} /> {s.label}
               </button>
               {idx < STEPS.length - 1 && (
                 <div className={`h-px w-6 rounded-full ${step > s.id ? "bg-violet-300" : "bg-gray-200"}`} />
@@ -176,7 +177,7 @@ export default function CriarEventoPage() {
         {step === 1 && (
           <Card className="shadow-lg border-violet-100">
             <CardHeader>
-              <CardTitle>📅 Dados do evento</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Calendar size={18} /> Dados do evento</CardTitle>
               <CardDescription>Informações básicas do seu evento</CardDescription>
             </CardHeader>
             <Separator />
@@ -217,7 +218,7 @@ export default function CriarEventoPage() {
                 disabled={!name || !date}
                 onClick={() => setStep(2)}
               >
-                Próximo →
+                Próximo <ArrowRight size={16} />
               </Button>
             </CardContent>
           </Card>
@@ -227,7 +228,7 @@ export default function CriarEventoPage() {
         {step === 2 && (
           <Card className="shadow-lg border-violet-100">
             <CardHeader>
-              <CardTitle>👤 Organizador</CardTitle>
+            <CardTitle className="flex items-center gap-2"><User size={18} /> Organizador</CardTitle>
               <CardDescription>Quem está criando este evento</CardDescription>
             </CardHeader>
             <Separator />
@@ -252,15 +253,15 @@ export default function CriarEventoPage() {
                 />
               </div>
               <div className="flex gap-3">
-                <Button variant="outline" className="flex-1 rounded-full" onClick={() => setStep(1)}>
-                  ← Voltar
+                <Button variant="outline" className="flex-1 rounded-full flex items-center justify-center gap-2" onClick={() => setStep(1)}>
+                  <ArrowLeft size={16} /> Voltar
                 </Button>
                 <Button
-                  className="flex-1 rounded-full"
+                  className="flex-1 rounded-full flex items-center justify-center gap-2"
                   disabled={!ownerName || !ownerEmail}
                   onClick={() => setStep(3)}
                 >
-                  Próximo →
+                  Próximo <ArrowRight size={16} />
                 </Button>
               </div>
             </CardContent>
@@ -271,7 +272,7 @@ export default function CriarEventoPage() {
         {step === 3 && (
           <Card className="shadow-lg border-violet-100">
             <CardHeader>
-              <CardTitle>🎨 Tema com IA & Playlist</CardTitle>
+            <CardTitle className="flex items-center gap-2"><Palette size={18} /> Tema com IA & Playlist</CardTitle>
               <CardDescription>Personalize a identidade visual do seu evento</CardDescription>
             </CardHeader>
             <Separator />
@@ -293,11 +294,12 @@ export default function CriarEventoPage() {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full rounded-full border-violet-300 text-violet-700 hover:bg-violet-50"
+                className="w-full rounded-full border-violet-300 text-violet-700 hover:bg-violet-50 flex items-center justify-center gap-2"
                 disabled={themeStep === "generating"}
                 onClick={handleGenerateTheme}
               >
-                {themeStep === "generating" ? "✨ Gerando tema..." : "✨ Gerar Tema com IA"}
+                <Sparkles size={16} />
+                {themeStep === "generating" ? "Gerando tema..." : "Gerar Tema com IA"}
               </Button>
 
               {/* Preview do tema */}
@@ -311,7 +313,7 @@ export default function CriarEventoPage() {
                       variant="secondary"
                       className="text-xs bg-white/20 text-white hover:bg-white/30"
                     >
-                      {themeSource === "ai" ? "✨ IA" : "⚙️ Padrão"}
+                      {themeSource === "ai" ? <><Sparkles size={10} /> IA</> : <><Settings2 size={10} /> Padrão</>}
                     </Badge>
                   </div>
                   <p className="font-semibold mt-2" style={{ fontFamily: previewTheme.fonts.heading }}>
@@ -361,18 +363,18 @@ export default function CriarEventoPage() {
               <div className="flex gap-3 pt-1">
                 <Button
                   variant="outline"
-                  className="flex-1 rounded-full"
+                  className="flex-1 rounded-full flex items-center justify-center gap-2"
                   disabled={loading}
                   onClick={() => setStep(2)}
                 >
-                  ← Voltar
+                  <ArrowLeft size={16} /> Voltar
                 </Button>
                 <Button
                   className="flex-1 rounded-full font-bold shadow-lg shadow-violet-200"
                   disabled={loading}
                   onClick={handleCreateEvent}
                 >
-                  {loading ? "Criando..." : "🎉 Criar Evento"}
+                  {loading ? "Criando..." : <><PartyPopper size={16} /> Criar Evento</>}
                 </Button>
               </div>
             </CardContent>
@@ -380,7 +382,7 @@ export default function CriarEventoPage() {
         )}
 
         <p className="text-center text-xs text-muted-foreground mt-8">
-          ✨ NOAH · Plataforma Event-as-a-Service
+          NOAH · Plataforma Event-as-a-Service
         </p>
       </div>
       </div>

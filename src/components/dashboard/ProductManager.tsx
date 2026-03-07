@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatBRL } from "@/lib/utils";
+import { Gift, Plus, Trash2 } from "lucide-react";
 
 interface Product {
   id: string;
@@ -85,11 +86,11 @@ export function ProductManager({ eventSlug, onDelete, initialProducts, primaryCo
           </div>
           <Button
             size="sm"
-            className="rounded-full"
+            className="rounded-full flex items-center gap-1.5"
             style={{ backgroundColor: primaryColor }}
             onClick={() => setDialogOpen(true)}
           >
-            + Adicionar presente
+            <Plus size={14} /> Adicionar presente
           </Button>
         </CardHeader>
 
@@ -103,7 +104,7 @@ export function ProductManager({ eventSlug, onDelete, initialProducts, primaryCo
           )}
           {products.length === 0 ? (
             <div className="py-12 text-center text-muted-foreground text-sm">
-              <p className="text-3xl mb-3">🎁</p>
+              <Gift size={40} className="mx-auto mb-3 opacity-30" />
               Nenhum presente ainda. Adicione o primeiro!
             </div>
           ) : (
@@ -115,7 +116,9 @@ export function ProductManager({ eventSlug, onDelete, initialProducts, primaryCo
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={p.imgUrl} alt={p.name} className="w-12 h-12 rounded-xl object-cover shrink-0" />
                     ) : (
-                      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-xl shrink-0">🎁</div>
+                      <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                        <Gift size={20} className="opacity-40" />
+                      </div>
                     )}
                     <div className="min-w-0">
                       <p className="font-semibold text-sm truncate">{p.name}</p>
@@ -135,7 +138,7 @@ export function ProductManager({ eventSlug, onDelete, initialProducts, primaryCo
                       onClick={() => handleDelete(p.id)}
                       className="text-destructive hover:text-destructive hover:bg-destructive/10 text-xs h-7 px-2"
                     >
-                      {deletingId === p.id ? "..." : "Remover"}
+                      {deletingId === p.id ? "..." : <><Trash2 size={12} /> Remover</>}
                     </Button>
                   </div>
                 </li>

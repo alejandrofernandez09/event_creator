@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { deleteProduct } from './actions';
+import { Lock, Wallet, TrendingUp, Users, CheckCircle2, XCircle } from 'lucide-react';
 
 interface Props { params: Promise<{ slug: string }>; searchParams: Promise<{ secret?: string }>; }
 export const dynamic = 'force-dynamic';
@@ -29,7 +30,7 @@ export default async function DashboardPage({ params, searchParams }: Props) {
       <div className='min-h-screen flex items-center justify-center bg-gradient-to-br from-violet-50 to-gray-50'>
         <Card className='w-full max-w-sm text-center shadow-lg'>
           <CardContent className='pt-8 pb-8 space-y-2'>
-            <p className='text-4xl mb-4'>🔒</p>
+            <Lock size={40} className='mx-auto mb-4 text-muted-foreground' />
             <p className='text-xl font-bold text-gray-800'>Acesso Restrito</p>
             <p className='text-sm text-muted-foreground'>Informe o parâmetro <code className='bg-muted px-1 rounded text-xs'>?secret=</code> correto para continuar.</p>
           </CardContent>
@@ -46,15 +47,19 @@ export default async function DashboardPage({ params, searchParams }: Props) {
   const confirmedResult = await db.select({ total: sum(orders.amount) }).from(orders)
     .where(and(eq(orders.eventId, event.id), eq(orders.status, 'CONFIRMED')));
 
-  const totalArrecadado = Number(confirmedResult[0]?.total ?? 0);
-  const comissaoDevida = calcComissao(totalArrecadado);
+  const totalVendas = Number(confirmedResult[0]?.total ?? 0);
+  const comissaoDevida = calcComissao(totalVendas);
+  const valorLiquido = totalVendas - comissaoDevida;
 
   const allOrders = await db.select().from(orders).where(eq(orders.eventId, event.id)).orderBy(orders.createdAt);
   const rsvpList = await db.select().from(rsvps).where(eq(rsvps.eventId, event.id)).orderBy(rsvps.createdAt);
   const productList = await db.select().from(products).where(eq(products.eventId, event.id)).orderBy(products.name);
 
-  const confirmedRsvps = rsvpList.filter((r) => r.status === 'confirmed').length;
   const confirmedOrders = allOrders.filter((o) => o.status === 'CONFIRMED').length;
+
+  const confirmedRsvps = rsvpList.filter((r) => r.status === 'confirmed').length;
+  const declinedRsvps  = rsvpList.filter((r) => r.status === 'declined').length;
+  const pendingRsvps   = rsvpList.length - confirmedRsvps - declinedRsvps;
 
   return (
     <div className='min-h-screen bg-gray-50/50'>
@@ -87,31 +92,31 @@ export default async function DashboardPage({ params, searchParams }: Props) {
         <div className='grid grid-cols-1 sm:grid-cols-3 gap-4'>
           <Card className='shadow-sm'>
             <CardHeader className='pb-2'>
-              <p className='text-xs uppercase tracking-wider text-muted-foreground font-semibold'>Total arrecadado</p>
+              <p className='text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5'><Wallet size={12} /> Valor líquido a receber</p>
             </CardHeader>
             <CardContent>
-              <p className='text-3xl font-extrabold' style={{ color: theme.colors.primary }}>{formatBRL(totalArrecadado)}</p>
+              <p className='text-3xl font-extrabold' style={{ color: theme.colors.primary }}>{formatBRL(valorLiquido)}</p>
+              <p className='text-xs text-muted-foreground mt-1'>Total vendas − 10% ({formatBRL(comissaoDevida)})</p>
+            </CardContent>
+          </Card>
+
+          <Card className='shadow-sm'>
+            <CardHeader className='pb-2'>
+              <p className='text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5'><TrendingUp size={12} /> Total de vendas</p>
+            </CardHeader>
+            <CardContent>
+              <p className='text-3xl font-extrabold text-foreground'>{formatBRL(totalVendas)}</p>
               <p className='text-xs text-muted-foreground mt-1'>{confirmedOrders} pagamento{confirmedOrders !== 1 ? 's' : ''} confirmado{confirmedOrders !== 1 ? 's' : ''}</p>
             </CardContent>
           </Card>
 
           <Card className='shadow-sm'>
             <CardHeader className='pb-2'>
-              <p className='text-xs uppercase tracking-wider text-muted-foreground font-semibold'>Comissão devida (10%)</p>
+              <p className='text-xs uppercase tracking-wider text-muted-foreground font-semibold flex items-center gap-1.5'><Users size={12} /> Convidados</p>
             </CardHeader>
             <CardContent>
-              <p className='text-3xl font-extrabold text-foreground'>{formatBRL(comissaoDevida)}</p>
-              <p className='text-xs text-muted-foreground mt-1'>Acerto pós-evento</p>
-            </CardContent>
-          </Card>
-
-          <Card className='shadow-sm'>
-            <CardHeader className='pb-2'>
-              <p className='text-xs uppercase tracking-wider text-muted-foreground font-semibold'>Confirmações RSVP</p>
-            </CardHeader>
-            <CardContent>
-              <p className='text-3xl font-extrabold text-foreground'>{rsvpList.length}</p>
-              <p className='text-xs text-muted-foreground mt-1'>{confirmedRsvps} confirmado{confirmedRsvps !== 1 ? 's' : ''}</p>
+              <p className='text-3xl font-extrabold text-emerald-600'>{confirmedRsvps}</p>
+              <p className='text-xs text-muted-foreground mt-1'>{rsvpList.length} convite{rsvpList.length !== 1 ? 's' : ''} respondido{rsvpList.length !== 1 ? 's' : ''}</p>
             </CardContent>
           </Card>
         </div>
@@ -196,12 +201,12 @@ export default async function DashboardPage({ params, searchParams }: Props) {
                     <td className='px-6 py-3.5 font-medium'>{rsvp.guestName}</td>
                     <td className='px-6 py-3.5'>
                       {rsvp.status === 'confirmed' ? (
-                        <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-100 text-emerald-700 border-emerald-200'>
-                          ✅ Confirmado
+                        <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border bg-emerald-100 text-emerald-700 border-emerald-200'>
+                          <CheckCircle2 size={12} /> Confirmado
                         </span>
                       ) : (
-                        <span className='inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border bg-gray-100 text-gray-500 border-gray-200'>
-                          ❌ Não vai
+                        <span className='inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold border bg-gray-100 text-gray-500 border-gray-200'>
+                          <XCircle size={12} /> Não vai
                         </span>
                       )}
                     </td>
@@ -218,7 +223,7 @@ export default async function DashboardPage({ params, searchParams }: Props) {
 
       </div>
       <footer className='border-t border-gray-200 py-6 text-center text-xs text-muted-foreground'>
-        ✨ NOAH · Dashboard do Evento
+        NOAH · Dashboard do Evento
       </footer>
     </div>
   );
