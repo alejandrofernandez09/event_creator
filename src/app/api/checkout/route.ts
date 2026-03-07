@@ -1,8 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
 import { orders, products, events } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { findOrCreateCustomer, createPixPayment, getPixQrCode } from "@/lib/asaas";
 
 const CheckoutSchema = z.object({
   productId: z.string().uuid(),
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const data = CheckoutSchema.parse(body);
 
-    // Valida que produto e evento existem
+    // Valida produto e evento
     const [product] = await db
       .select()
       .from(products)
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     const [event] = await db
-      .select({ id: events.id })
+      .select({ id: events.id, name: events.name })
       .from(events)
       .where(eq(events.slug, data.eventSlug))
       .limit(1);
@@ -55,26 +56,57 @@ export async function POST(req: NextRequest) {
       .returning();
 
     if (!paymentsEnabled) {
-      // Feature flag desligado: retorna order criada sem Pix real
-      console.warn("[checkout] ENABLE_PAYMENTS=false  Pix nao gerado (integracao Asaas pendente)");
+      console.warn("[checkout] ENABLE_PAYMENTS=false â€” Pix nao gerado");
       return NextResponse.json({
-        order,
+        orderId: order.id,
         pixCode: null,
-        warning: "Integracao com Asaas pendente. ENABLE_PAYMENTS=false.",
+        pixQrCodeImage: null,
+        pixExpiry: null,
+        warning: "Pagamentos desabilitados. Defina ENABLE_PAYMENTS=true para gerar Pix real.",
       }, { status: 201 });
     }
 
-    // TODO Sprint 1: Integrar Asaas API aqui
-    // const asaasResponse = await createAsaasPayment({ order, event, product });
-    // await db.update(orders).set({ pixId: asaasResponse.id, pixCode: asaasResponse.pixQrCode })
-    //   .where(eq(orders.id, order.id));
+    // â”€â”€ IntegraÃ§Ã£o Asaas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // 1. Cria ou encontra o customer no Asaas
+    const customerId = await findOrCreateCustomer(data.guestName, data.guestEmail);
 
-    return NextResponse.json({ order, pixCode: null, info: "Asaas integration pending" }, { status: 201 });
+    // 2. Cria a cobranÃ§a PIX
+    const payment = await createPixPayment({
+      customerId,
+      valueInCents: product.price,
+      description: `Presente: ${product.name} â€” ${event.name}`,
+      orderId: order.id,
+    });
+
+    // 3. Busca QR Code
+    const qrCode = await getPixQrCode(payment.id);
+
+    // 4. Persiste pixId, pixCode e pixExpiry na order
+    await db
+      .update(orders)
+      .set({
+        pixId: payment.id,
+        pixCode: qrCode.payload,
+        pixExpiry: new Date(qrCode.expirationDate),
+        updatedAt: new Date(),
+      })
+      .where(eq(orders.id, order.id));
+
+    console.log(`[checkout] Order ${order.id} criada â€” pixId ${payment.id}`);
+
+    return NextResponse.json({
+      orderId: order.id,
+      pixCode: qrCode.payload,
+      pixQrCodeImage: qrCode.encodedImage,
+      pixExpiry: qrCode.expirationDate,
+    }, { status: 201 });
+
   } catch (err) {
     console.error("[checkout] Error:", err);
     if (err instanceof z.ZodError) {
       return NextResponse.json({ error: err.issues.map((e) => e.message).join(", ") }, { status: 400 });
     }
-    return NextResponse.json({ error: "Erro no checkout" }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "Erro no checkout";
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }

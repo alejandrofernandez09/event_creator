@@ -23,6 +23,11 @@ interface CheckoutState {
   loading: boolean;
   done: boolean;
   error: string;
+  // Dados do Pix retornados pelo checkout
+  pixCode: string;
+  pixQrCodeImage: string;
+  pixExpiry: string;
+  copied: boolean;
 }
 
 function GiftCardSkeleton() {
@@ -43,11 +48,12 @@ function GiftCardSkeleton() {
 
 export function GiftList({ products, eventSlug }: GiftListProps) {
   const [checkout, setCheckout] = useState<CheckoutState>({
-    productId: null, guestName: '', guestEmail: '', loading: false, done: false, error: '',
+    productId: null, guestName: '', guestEmail: '', loading: false, done: false,
+    error: '', pixCode: '', pixQrCodeImage: '', pixExpiry: '', copied: false,
   });
 
   function openCheckout(productId: string) {
-    setCheckout((c) => ({ ...c, productId, done: false, error: '' }));
+    setCheckout((c) => ({ ...c, productId, done: false, error: '', pixCode: '', pixQrCodeImage: '', pixExpiry: '', copied: false }));
   }
 
   function closeCheckout() {
@@ -72,7 +78,12 @@ export function GiftList({ products, eventSlug }: GiftListProps) {
       });
       const data = await res.json();
       if (!res.ok) { setCheckout((c) => ({ ...c, loading: false, error: data.error ?? 'Erro ao processar pedido' })); return; }
-      setCheckout((c) => ({ ...c, loading: false, done: true }));
+      setCheckout((c) => ({
+        ...c, loading: false, done: true,
+        pixCode: data.pixCode ?? '',
+        pixQrCodeImage: data.pixQrCodeImage ?? '',
+        pixExpiry: data.pixExpiry ?? '',
+      }));
     } catch {
       setCheckout((c) => ({ ...c, loading: false, error: 'Erro de conexao' }));
     }
@@ -161,16 +172,46 @@ export function GiftList({ products, eventSlug }: GiftListProps) {
       <Dialog open={!!checkout.productId} onOpenChange={(open) => { if (!open) closeCheckout(); }}>
         <DialogContent className="sm:max-w-sm">
           {checkout.done ? (
-            <div className="text-center py-6 space-y-4">
+            <div className="text-center py-4 space-y-4">
               <div className="w-16 h-16 rounded-full flex items-center justify-center text-3xl mx-auto" style={{ backgroundColor: "var(--color-primary)18" }}>
                 🎉
               </div>
               <DialogHeader>
-                <DialogTitle style={{ fontFamily: "var(--font-heading)" }}>Pix gerado com sucesso!</DialogTitle>
+                <DialogTitle style={{ fontFamily: "var(--font-heading)" }}>Pix gerado!</DialogTitle>
                 <DialogDescription style={{ fontFamily: "var(--font-body)" }}>
-                  Aguardando confirmação do pagamento. O presente será registrado automaticamente ao confirmar o Pix.
+                  Escaneie o QR Code ou copie o código abaixo
                 </DialogDescription>
               </DialogHeader>
+              {checkout.pixQrCodeImage && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={`data:image/png;base64,${checkout.pixQrCodeImage}`}
+                  alt="QR Code Pix"
+                  className="mx-auto w-48 h-48 rounded-xl border"
+                />
+              )}
+              {checkout.pixCode && (
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">Código copia-e-cola</p>
+                  <div className="flex gap-2 items-center">
+                    <code className="text-xs bg-muted px-3 py-2 rounded-lg flex-1 truncate text-left block">
+                      {checkout.pixCode}
+                    </code>
+                    <Button
+                      size="sm"
+                      type="button"
+                      onClick={() => { navigator.clipboard.writeText(checkout.pixCode); setCheckout((c) => ({ ...c, copied: true })); }}
+                    >
+                      {checkout.copied ? "✓" : "Copiar"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {checkout.pixExpiry && (
+                <p className="text-xs text-muted-foreground">
+                  Válido até {new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeStyle: "short" }).format(new Date(checkout.pixExpiry))}
+                </p>
+              )}
               <Button className="w-full rounded-full" style={{ backgroundColor: "var(--color-primary)", color: "#fff" }} onClick={closeCheckout}>
                 Fechar
               </Button>
